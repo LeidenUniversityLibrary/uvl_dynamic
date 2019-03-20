@@ -1,0 +1,4 @@
+name = "UVL dynamic"
+description = "Changes menus and views in page context"
+package = "Custom"
+core = "7.x"

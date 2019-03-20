@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Defines all the hooks this module implements.
+ */
+
+function uvl_dynamic_block_info() {
+  $blocks['search_all_items'] = array(
+    // info: Search all items.
+    'info' => t('Search all items'),
+  );
+
+  return $blocks;
+}
+
+function uvl_dynamic_block_view($delta = '') {
+  $block = NULL;
+  switch ($delta) {
+    case 'search_all_items':
+      // Set block title.
+      $block['subject'] = t('All items');
+      // Get the node object from page.
+      $node = menu_get_object();
+
+      // Only display block content when field_all_items_link is set.
+      if ($node && isset($node->field_all_items_link[LANGUAGE_NONE][0]['url'])) {
+        $url = $node->field_all_items_link[LANGUAGE_NONE][0]['url'];
+        $title = $node->field_all_items_link[LANGUAGE_NONE][0]['title'];
+        $block['content'] = l($title, $url);
+      }
+      break;
+  }
+
+  return $block;
+}

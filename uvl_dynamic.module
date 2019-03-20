@@ -24,7 +24,7 @@ function uvl_dynamic_block_view($delta = '') {
       $node = menu_get_object();
 
       // Only display block content when field_all_items_link is set.
-      if ($node && isset($node->field_all_items_link[LANGUAGE_NONE][0]['url'])) {
+      if ($node && !empty($node->field_all_items_link[LANGUAGE_NONE][0]['url'])) {
         $url = $node->field_all_items_link[LANGUAGE_NONE][0]['url'];
         $title = $node->field_all_items_link[LANGUAGE_NONE][0]['title'];
         $block['content'] = l($title, $url);

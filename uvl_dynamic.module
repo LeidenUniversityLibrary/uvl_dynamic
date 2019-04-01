@@ -10,6 +10,10 @@ function uvl_dynamic_block_info() {
     // info: Search all items.
     'info' => t('Search all items'),
   ];
+  $blocks['collection_menu'] = [
+    // info: Search all items.
+    'info' => t('Collection menu'),
+  ];
 
   return $blocks;
 }
@@ -53,7 +57,19 @@ function uvl_dynamic_block_view($delta = '') {
         }
       }
       break;
+
+    case 'collection_menu':
+
   }
 
   return $block;
 }
+
+function uvl_dynamic_node_presave($node) {
+  if ($node->type == 'collection' || $node->type == 'subcollection') {
+    if (!empty($node->field_collection_id[0]['value'])) {
+
+    }
+  }
+}
+

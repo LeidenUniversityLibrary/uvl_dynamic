@@ -6,28 +6,51 @@
  */
 
 function uvl_dynamic_block_info() {
-  $blocks['search_all_items'] = array(
+  $blocks['search_all_items'] = [
     // info: Search all items.
     'info' => t('Search all items'),
-  );
+  ];
 
   return $blocks;
 }
 
+/**
+ * Implements hook_block_view();
+ */
 function uvl_dynamic_block_view($delta = '') {
   $block = NULL;
   switch ($delta) {
     case 'search_all_items':
       // Set block title.
       $block['subject'] = t('All items');
-      // Get the node object from page.
-      $node = menu_get_object();
+      // Get the collection ID from path
+      $path = drupal_parse_url(current_path());
 
-      // Only display block content when field_all_items_link is set.
-      if ($node && !empty($node->field_all_items_link[LANGUAGE_NONE][0]['url'])) {
-        $url = $node->field_all_items_link[LANGUAGE_NONE][0]['url'];
-        $title = $node->field_all_items_link[LANGUAGE_NONE][0]['title'];
-        $block['content'] = l($title, $url);
+      if (!empty($path['path']) && is_string($path['path'])) {
+        $collection_id = explode('/', $path['path']);
+        $collection_id = end($collection_id);
+
+        // Query the collection by collection ID field value.
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', ['collection', 'subcollection'])
+          ->propertyCondition('status', NODE_PUBLISHED)
+          ->fieldCondition('field_collection_id', 'value', $collection_id, '=')
+          ->range(0, 1);
+        $result =$query->execute();
+        $result = end($result);
+        $result = end($result);
+      }
+
+      if (is_object($result)) {
+        $node = node_load($result->nid);
+
+        // Only display block content when field_all_items_link is set.
+        if ($node && !empty($node->field_all_items_link[LANGUAGE_NONE][0]['url'])) {
+          $url = $node->field_all_items_link[LANGUAGE_NONE][0]['url'];
+          $title = $node->field_all_items_link[LANGUAGE_NONE][0]['title'];
+          $block['content'] = l($title, $url);
+        }
       }
       break;
   }

@@ -37,13 +37,28 @@ function uvl_dynamic_block_view($delta = '') {
         // Query the collection by collection ID field value.
         $query = new EntityFieldQuery();
         $query->entityCondition('entity_type', 'node')
-          ->entityCondition('bundle', ['collection', 'subcollection'])
+          ->entityCondition('bundle', 'collection', '=')
           ->propertyCondition('status', NODE_PUBLISHED)
           ->fieldCondition('field_collection_id', 'value', $collection_id, '=')
           ->range(0, 1);
         $result =$query->execute();
-        $result = end($result);
-        $result = end($result);
+
+        // Search on subcollection when there are no results.
+        if (!$result) {
+          $query = new EntityFieldQuery();
+          $query->entityCondition('entity_type', 'node')
+            ->entityCondition('bundle', 'subcollection', '=')
+            ->propertyCondition('status', NODE_PUBLISHED)
+            ->fieldCondition('field_collection_identifier', 'value', $collection_id, '=')
+            ->range(0, 1);
+          $result =$query->execute();
+        }
+        if (is_array($result)) {
+          $result = end($result);
+          if (is_array($result)) {
+            $result = end($result);
+          }
+        }
       }
 
       if (is_object($result)) {
@@ -92,6 +107,6 @@ function _collection_menu_block_content($collection_id) {
       break;
     }
   }
-  return !empty($childtree) ? menu_tree_output($childtree) : FALSE;
+  return !empty($childtree) ? menu_tree_output($childtree) : false;
 }
 

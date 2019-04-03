@@ -59,17 +59,39 @@ function uvl_dynamic_block_view($delta = '') {
       break;
 
     case 'collection_menu':
-
+      // Get collection ID from path and render menu item when available.
+      $path = explode('/', current_path());
+      $collection_id = $path[2];
+      if (!empty($collection_id) && strpos($collection_id, 'collection:') === 0) {
+        $block['title'] = t('Subcollections');
+        if ($menu = _collection_menu_block_content($collection_id)) {
+          $block['content'] = $menu;
+        }
+      }
+      break;
   }
 
   return $block;
 }
 
-function uvl_dynamic_node_presave($node) {
-  if ($node->type == 'collection' || $node->type == 'subcollection') {
-    if (!empty($node->field_collection_id[0]['value'])) {
-
+/**
+ * Generates output of a menu tree starting from dynamic item.
+ *
+ * @param string $collection_id
+ *   Collection identifier (PID).
+ *
+ * @return array|bool
+ *   Menu build array or false if nothing found.
+ */
+function _collection_menu_block_content($collection_id) {
+  $menu = 'menu-sub-collections';
+  $tree = menu_tree_all_data($menu);
+  foreach ($tree as $branch){
+    if ($branch['link']['title'] == $collection_id){
+      $childtree = $branch['below'];
+      break;
     }
   }
+  return !empty($childtree) ? menu_tree_output($childtree) : FALSE;
 }
 

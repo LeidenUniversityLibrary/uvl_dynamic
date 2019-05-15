@@ -75,7 +75,8 @@ function uvl_dynamic_block_view($delta = '') {
           if ($node && !empty($node->field_all_items_link[LANGUAGE_NONE][0]['url'])) {
             $url = $node->field_all_items_link[LANGUAGE_NONE][0]['url'];
             $title = $node->field_all_items_link[LANGUAGE_NONE][0]['title'];
-            $block['content'] = l($title, $parsed['path']);
+            $parsed = drupal_parse_url($url);
+            $block['content'] = l($title, $parsed['path'], $parsed);
           }
         }
       }

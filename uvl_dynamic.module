@@ -34,41 +34,49 @@ function uvl_dynamic_block_view($delta = '') {
         $collection_id = explode('/', $path['path']);
         $collection_id = end($collection_id);
 
-        // Query the collection by collection ID field value.
-        $query = new EntityFieldQuery();
-        $query->entityCondition('entity_type', 'node')
-          ->entityCondition('bundle', 'collection', '=')
-          ->propertyCondition('status', NODE_PUBLISHED)
-          ->fieldCondition('field_collection_id', 'value', $collection_id, '=')
-          ->range(0, 1);
-        $result =$query->execute();
-
-        // Search on subcollection when there are no results.
-        if (!$result) {
+        if (drupal_is_front_page()) {
+          $node_id = $collection_id;
+        }
+        else {
+          // Query the collection by collection ID field value.
           $query = new EntityFieldQuery();
           $query->entityCondition('entity_type', 'node')
-            ->entityCondition('bundle', 'subcollection', '=')
+            ->entityCondition('bundle', 'collection', '=')
             ->propertyCondition('status', NODE_PUBLISHED)
-            ->fieldCondition('field_collection_identifier', 'value', $collection_id, '=')
+            ->fieldCondition('field_collection_id', 'value', $collection_id, '=')
             ->range(0, 1);
           $result =$query->execute();
-        }
-        if (is_array($result)) {
-          $result = end($result);
+
+          // Search on subcollection when there are no results.
+          if (!$result) {
+            $query = new EntityFieldQuery();
+            $query->entityCondition('entity_type', 'node')
+              ->entityCondition('bundle', 'subcollection', '=')
+              ->propertyCondition('status', NODE_PUBLISHED)
+              ->fieldCondition('field_collection_identifier', 'value', $collection_id, '=')
+              ->range(0, 1);
+            $result =$query->execute();
+          }
           if (is_array($result)) {
             $result = end($result);
+            if (is_array($result)) {
+              $result = end($result);
+              if (is_object($result)) {
+                $node_id = $result->nid;
+              }
+            }
           }
         }
-      }
 
-      if (is_object($result)) {
-        $node = node_load($result->nid);
+        if (isset($node_id)) {
+          $node = node_load($node_id);
 
-        // Only display block content when field_all_items_link is set.
-        if ($node && !empty($node->field_all_items_link[LANGUAGE_NONE][0]['url'])) {
-          $url = $node->field_all_items_link[LANGUAGE_NONE][0]['url'];
-          $title = $node->field_all_items_link[LANGUAGE_NONE][0]['title'];
-          $block['content'] = l($title, $url);
+          // Only display block content when field_all_items_link is set.
+          if ($node && !empty($node->field_all_items_link[LANGUAGE_NONE][0]['url'])) {
+            $url = $node->field_all_items_link[LANGUAGE_NONE][0]['url'];
+            $title = $node->field_all_items_link[LANGUAGE_NONE][0]['title'];
+            $block['content'] = l($title, $parsed['path']);
+          }
         }
       }
       break;

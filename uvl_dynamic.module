@@ -47,16 +47,6 @@ function uvl_dynamic_block_view($delta = '') {
             ->range(0, 1);
           $result =$query->execute();
 
-          // Search on subcollection when there are no results.
-          if (!$result) {
-            $query = new EntityFieldQuery();
-            $query->entityCondition('entity_type', 'node')
-              ->entityCondition('bundle', 'subcollection', '=')
-              ->propertyCondition('status', NODE_PUBLISHED)
-              ->fieldCondition('field_collection_identifier', 'value', $collection_id, '=')
-              ->range(0, 1);
-            $result =$query->execute();
-          }
           if (is_array($result)) {
             $result = end($result);
             if (is_array($result)) {

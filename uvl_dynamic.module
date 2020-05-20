@@ -65,6 +65,22 @@ function uvl_dynamic_block_view($delta = '') {
           if ($node && !empty($node->field_all_items_link[LANGUAGE_NONE][0]['url'])) {
             $url = $node->field_all_items_link[LANGUAGE_NONE][0]['url'];
             $title = $node->field_all_items_link[LANGUAGE_NONE][0]['title'];
+          }
+          else if (arg(1) == 'object' && islandora_is_valid_pid(arg(2))) {
+            $object = islandora_object_load(arg(2));
+            if ($object) {
+              $url = url("islandora/search", array(
+                'query' => array(
+                  'type' => 'edismax',
+                  'islandora_solr_search_navigation' => '1',
+                  'f[0]' => 'ancestors_ms:"' . $object->id . '"',
+                  'cp' => $object->id,
+                ),
+              ));
+              $title = t('All @collection items', array('@collection' => $object->label));
+            }
+          }
+          if (isset($url)) {
             $parsed = drupal_parse_url($url);
             $block['content'] = l($title, $parsed['path'], $parsed);
           }
